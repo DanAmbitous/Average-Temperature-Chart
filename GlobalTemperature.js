@@ -8,18 +8,19 @@ inputContainer.addEventListener('change', () => {
 })
 
 const charting = async () => {
-  const data = await fetchingData();
-  const dataNorthern = await fetchingDataNorthern();
+  const globalData = await fetchingData('CSVFiles/GLB.Ts+dSST.csv');
+  const northernData = await fetchingData('CSVFiles/NH.Ts+dSST.csv');
+  const southernData = await fetchingData('CSVFiles/SH.Ts+dSST.csv');
 
   const ctx = document.getElementById('chart').getContext('2d');
   new Chart(ctx, {
     type: 'line',
     data: {
-        labels: data.years,
+        labels: globalData.years,
         datasets: [
           {
             label: 'Average Global Temperature',
-            data: data.temperatures,
+            data: globalData.temperatures,
             backgroundColor: [
                 'green'
             ],
@@ -30,12 +31,23 @@ const charting = async () => {
         },
         {
           label: 'Average Northern Hemisphere Temperature',
-          data: dataNorthern.temperatures,
+          data: northernData.temperatures,
           backgroundColor: [
               'blue'
           ],
           borderColor: [
               'blue'
+          ],
+          borderWidth: 1,
+        },
+        {
+          label: 'Average Southern Hemisphere Temperature',
+          data: southernData.temperatures,
+          backgroundColor: [
+              'red'
+          ],
+          borderColor: [
+              'red'
           ],
           borderWidth: 1,
         }
@@ -44,42 +56,49 @@ const charting = async () => {
     options: {
         scales: {
             y: {
-             
+              ticks: {
+                callback: (value) => {
+                  return `${value}°C`
+                }
+              }
             }
-        }
+        },
+        plugins: {
+          tooltip: {
+              callbacks: {
+                  label: (context) => {
+                    // An object containg the data about each dot on the chart, such as it's label, year, temperature, etc
+                    console.log(context);
+
+                      // assigns to label the name of the dot (It's label which can be found from it's color on the chart key)
+                      let label = context.dataset.label || '';
+
+                      if (label) {
+                          label += ': ';
+                      }
+                      
+                      // context.parsed.y is the temperature value in number data type
+                      if (context.parsed.y !== null) {
+                        console.log(context.parsed.y);
+                          label += `${context.parsed.y}°C`
+                          
+                          /*new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);*/
+                      }
+
+                      return label;
+                  }
+              }
+          }
+      }
     }
   });
 }
 
-const fetchingData = async () => {
+const fetchingData = async (csvFile) => {
   const years = [];
   const temperatures = [];
 
-  const responseFlow = await fetch('GLB.Ts+dSST.csv');
-  let data = await responseFlow.text();
-  data = data.trim();
-  let dataArrayifed = data.split(/\n/);
-  dataArrayifed = dataArrayifed.slice(2); 
-
-  console.log(dataArrayifed);
-
-  dataArrayifed.forEach(row => {
-    const column = row.split(/,/);
-    const year = column[0];
-    const temperature = column[1];
-
-    years.push(year);
-    temperatures.push(Number(temperature) + 14);
-  });
-
-  return { years, temperatures }
-}
-
-const fetchingDataNorthern = async () => {
-  const years = [];
-  const temperatures = [];
-
-  const responseFlow = await fetch('NH.Ts+dSST.csv');
+  const responseFlow = await fetch(csvFile);
   let data = await responseFlow.text();
   data = data.trim();
   let dataArrayifed = data.split(/\n/);
