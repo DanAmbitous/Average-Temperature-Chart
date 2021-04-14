@@ -1,10 +1,3 @@
-const inputContainer = document.getElementById('input-container');
-const dropDownList = document.getElementById('temperature-unit');
-
-inputContainer.addEventListener('change', () => {
-  fetchingData('CSVFiles/GLB.Ts+dSST.csv');
-})
-
 const temperatureData = (name, temperature, color) => {
  return {
     label: name,
@@ -20,7 +13,7 @@ const temperatureData = (name, temperature, color) => {
 }
 
 const charting = async () => {
-  console.log('hi');
+  console.log('grahping')
   const globalData = await fetchingData('CSVFiles/GLB.Ts+dSST.csv');
   const northernData = await fetchingData('CSVFiles/NH.Ts+dSST.csv');
   const southernData = await fetchingData('CSVFiles/SH.Ts+dSST.csv');
@@ -76,6 +69,7 @@ const charting = async () => {
 }
 
 const fetchingData = async (csvFile) => {
+  console.log('fetching')
   const years = [];
   const temperatures = [];
 
@@ -94,28 +88,6 @@ const fetchingData = async (csvFile) => {
 
     temperatures.push(Number(temperature) + 14);
   });
-
-  if (dropDownList.value === 'fahrenheit') {
-    temperatures.pop();
-
-    dataArrayifed.forEach(row => {
-      const column = row.split(/,/);
-      const temperature = column[1];
-    
-      temperatures.push((Number(temperature) + 14) * 9/5 + 32);
-    });
-  }
-
-  if (dropDownList.value === "kelvin") {
-    temperatures.pop();
-
-    dataArrayifed.forEach(row => {
-      const column = row.split(/,/);
-      const temperature = column[1];
-    
-      temperatures.push((Number(temperature) + 14) + 273);
-    }); 
-  }
 
   return { years, temperatures }
 }
