@@ -1,13 +1,12 @@
 const inputContainer = document.getElementById('input-container');
-const globalTemperature = document.getElementById('Global');
-const northernHemisphereTemperature = document.getElementById('Northern');
-const southernHemisphereTemperature = document.getElementById('Southern');
+const dropDownList = document.getElementById('temperature-unit');
 
 inputContainer.addEventListener('change', () => {
-  console.log(dataType());
+  fetchingData();
 })
 
 const charting = async () => {
+  console.log('hi');
   const globalData = await fetchingData('CSVFiles/GLB.Ts+dSST.csv');
   const northernData = await fetchingData('CSVFiles/NH.Ts+dSST.csv');
   const southernData = await fetchingData('CSVFiles/SH.Ts+dSST.csv');
@@ -58,7 +57,7 @@ const charting = async () => {
             y: {
               ticks: {
                 callback: (value) => {
-                  return `${value}°C`
+                  return `${value}°`
                 }
               }
             }
@@ -68,7 +67,6 @@ const charting = async () => {
               callbacks: {
                   label: (context) => {
                     // An object containg the data about each dot on the chart, such as it's label, year, temperature, etc
-                    console.log(context);
 
                       // assigns to label the name of the dot (It's label which can be found from it's color on the chart key)
                       let label = context.dataset.label || '';
@@ -79,8 +77,7 @@ const charting = async () => {
                       
                       // context.parsed.y is the temperature value in number data type
                       if (context.parsed.y !== null) {
-                        console.log(context.parsed.y);
-                          label += `${context.parsed.y}°C`
+                          label += `${context.parsed.y}°`
                           
                           /*new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);*/
                       }
@@ -104,30 +101,28 @@ const fetchingData = async (csvFile) => {
   let dataArrayifed = data.split(/\n/);
   dataArrayifed = dataArrayifed.slice(2); 
 
-  console.log(dataArrayifed);
-
   dataArrayifed.forEach(row => {
     const column = row.split(/,/);
     const year = column[0];
     const temperature = column[1];
 
     years.push(year);
+
     temperatures.push(Number(temperature) + 14);
   });
+
+  if (dropDownList.value === 'fahrenheit') {
+    temperatures.pop();
+
+    dataArrayifed.forEach(row => {
+      const column = row.split(/,/);
+      const temperature = column[1];
+    
+      temperatures.push((Number(temperature) + 14) * 9/5 + 32);
+    });
+  }
 
   return { years, temperatures }
 }
 
 charting();
-
-const dataType = () => {
-  let output;
-
-  let globalValue = globalTemperature.checked;
-  let northernValue = northernHemisphereTemperature.checked;
-  let southernValue = southernHemisphereTemperature.checked;
-
-  if (globalTemperature.checked) {
-
-  }
-}
