@@ -2,8 +2,22 @@ const inputContainer = document.getElementById('input-container');
 const dropDownList = document.getElementById('temperature-unit');
 
 inputContainer.addEventListener('change', () => {
-  fetchingData();
+  fetchingData('CSVFiles/GLB.Ts+dSST.csv');
 })
+
+const temperatureData = (name, temperature, color) => {
+ return {
+    label: name,
+    data: temperature,
+    backgroundColor: [
+      color
+    ],
+    borderColor: [
+      color
+    ],
+    borderWidth: 1,
+  }
+}
 
 const charting = async () => {
   console.log('hi');
@@ -17,39 +31,9 @@ const charting = async () => {
     data: {
         labels: globalData.years,
         datasets: [
-          {
-            label: 'Average Global Temperature',
-            data: globalData.temperatures,
-            backgroundColor: [
-                'green'
-            ],
-            borderColor: [
-                'green'
-            ],
-            borderWidth: 1,
-        },
-        {
-          label: 'Average Northern Hemisphere Temperature',
-          data: northernData.temperatures,
-          backgroundColor: [
-              'blue'
-          ],
-          borderColor: [
-              'blue'
-          ],
-          borderWidth: 1,
-        },
-        {
-          label: 'Average Southern Hemisphere Temperature',
-          data: southernData.temperatures,
-          backgroundColor: [
-              'red'
-          ],
-          borderColor: [
-              'red'
-          ],
-          borderWidth: 1,
-        }
+          temperatureData('Average Global Temperature', globalData.temperatures, 'green'),
+          temperatureData('Average Northern Hemisphere Temperature', northernData.temperatures, 'blue'),
+          temperatureData('Average Southern Hemisphere Temperature', southernData.temperatures, 'red')
       ]
     },
     options: {
@@ -120,6 +104,17 @@ const fetchingData = async (csvFile) => {
     
       temperatures.push((Number(temperature) + 14) * 9/5 + 32);
     });
+  }
+
+  if (dropDownList.value === "kelvin") {
+    temperatures.pop();
+
+    dataArrayifed.forEach(row => {
+      const column = row.split(/,/);
+      const temperature = column[1];
+    
+      temperatures.push((Number(temperature) + 14) + 273);
+    }); 
   }
 
   return { years, temperatures }
